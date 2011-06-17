@@ -1,0 +1,112 @@
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	/*font-family: Arial, Helvetica, sans-serif;*/
+	/*font-family: "Courier New", monospace;*/
+	font-family: monospace;
+	font-size: 14px;
+}
+
+#container {
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	z-index: 1;
+	-webkit-user-select: none;
+	cursor: default;
+}
+#container:active {
+	cursor: move;
+}
+#container.editing {
+	cursor: text;
+}
+#container.examining {
+	cursor: crosshair;
+}
+
+#header {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 1em;
+	border-bottom: 1px solid black;
+	z-index: 3;
+	background-color: #eee;
+	font-size: 16px;
+	padding-left: 1ex;
+}
+#play-button {
+	width: 1.3em;
+	text-align: center;
+	float: right;
+	line-height: 1em;
+	background-color: #555;
+	color: #fff;
+}
+#play-button:not(.playing) .stop, #play-button.playing .play {
+	display: none;
+}
+#play-button:hover {
+	color: #fc0;
+}
+#play-button:active {
+	color: #d90;
+}
+
+#timeline {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 1.3em;
+	bottom: 0;
+}
+#timeline-slider {
+	position: absolute;
+	height: 100%;
+	-webkit-box-sizing: border-box;
+	   -moz-box-sizing: border-box;
+	        box-sizing: border-box;
+	background-color: #bbb;
+	border: 3px #ddd;
+	border-style: outset none;
+	border-radius: 5px;
+	font-size: 10px;
+	line-height: 1em;
+	padding: 0 6px;
+}
+#timeline-slider:hover {
+	background-color: #ccc;
+	border-color: #eee;
+}
+#timeline-slider:active {
+	border-style: inset none;
+}
+
+#text {
+	position: absolute;
+	white-space: pre;
+	line-height: 15px;
+}
+
+.cell {
+	position: absolute;
+	display: block;
+	z-index: 2;
+	min-width: 3em;
+	min-height: 3em;
+}
+.cell.loading {
+	background-color: #f6f6f6;
+	color: #777;
+}
+
+.highlight, .cursor {
+	position: absolute;
+	background-color: #ff0;
+	z-index: 1;
+}
