@@ -302,7 +302,8 @@ function listenForDeltas(since) {
 		world: world
 	});
 	changesPromise.onChange(function (resp) {
-		resp.results.forEach(function (change) {
+		var results = resp.results;
+		if (results) results.forEach(function (change) {
 			// a new, updated, or deleted tile doc
 			receiveDelta(change.doc);
 		});
@@ -422,7 +423,13 @@ function Updater(db, since) {
 	}
 
 	this.listenForUpdates = function () {
-		db.changes(since, {filter: "textworld/design"}).onChange(refreshSoon);
+		db.changes(since, {
+			filter: "textworld/design"
+		}).onChange(function (resp) {
+			if (!resp.error) {
+				refreshSoon();
+			}
+		});
 	};
 }
 
