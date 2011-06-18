@@ -47,7 +47,7 @@ function(doc) {
 		for (var x = xStart; x < xEnd; x += boxW) {
 			var xCut = x - offsetX;
 			var yCut = y - offsetY;
-			emit([x, y, doc.date], substr2d(xCut, yCut));
+			emit([doc.world, x, y, doc.date], substr2d(xCut, yCut));
 		}
 	}
 }

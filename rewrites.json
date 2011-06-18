@@ -4,6 +4,10 @@
 		"to" : "../../*"
 	},
 	{
+		"from": ":world",
+		"to": "index.html"
+	},
+	{
 		"from": "",
 		"to": "index.html"
 	},

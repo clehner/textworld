@@ -6,6 +6,8 @@ var db = Couch.db("textworld");
 var cellsElement = $("text");
 var containerElement = $("container");
 
+var world = location.pathname.match(/^.*\/(.*?)$/)[1] || "cel";
+
 var cells = {
 	add: function (cell) {
 		var coords = cell.coords;
@@ -104,9 +106,9 @@ Cell.prototype = {
 		}
 		//console.log(this.coords, 'bring', this.lastDeltaDate, 'to', timeline.currentTime);
 		db.view('textworld/deltas', {
-			group_level: 2,
-			startkey: this.coords.concat(this.lastDeltaDate),
-			endkey: this.coords.concat(timeline.currentTime),
+			group_level: 3,
+			startkey: [world].concat(this.coords, this.lastDeltaDate),
+			endkey: [world].concat(this.coords, timeline.currentTime),
 			success: this._dataLoaded.bind(this)
 		});
 		cells._onCellLoadStart(this);
@@ -214,11 +216,13 @@ Cell.prototype = {
 // Only load from those cells.
 var preloadCellsList = true;
 if (preloadCellsList) db.view('textworld/deltas_count', {
-	group_level: 2,
+	group_level: 3,
+	startkey: [world],
+	endkey: [world, {}],
 	success: function (data) {
 		data.rows.forEach(function (row) {
 			var key = row.key;
-			var cell = new Cell(key[0], key[1]);
+			var cell = new Cell(key[1], key[2]);
 			cells.add(cell);
 		});
 	}
@@ -294,7 +298,8 @@ function listenForDeltas(since) {
 	}
 	changesPromise = db.changes(since, {
 		filter: 'textworld/deltas',
-		include_docs: true
+		include_docs: true,
+		world: world
 	});
 	changesPromise.onChange(function (resp) {
 		resp.results.forEach(function (change) {
@@ -568,6 +573,7 @@ function Editor() {
 		var content = this.content;
 		db.saveDoc({
 			type: "delta",
+			world: world,
 			x: this.x,
 			y: this.y,
 			content: content,
@@ -656,14 +662,14 @@ function Editor() {
 function examineLetter(x, y, forward) {
 	var startTime = timeline.currentTime + (forward ? .1 : -.1);
 	db.view("textworld/character_history", {
-		startkey: [x, y].concat(startTime),
-		endkey: [x, y].concat(forward ? {} : 0),
+		startkey: [world, x, y].concat(startTime),
+		endkey: [world, x, y].concat(forward ? {} : 0),
 		limit: 1,
 		descending: !forward,
 		success: function (resp) {
 			var row = resp.rows[0];
 			if (row) {
-				var time = row.key[2];
+				var time = row.key[3];
 				timeline.setCurrentTime(time);
 			} else {
 				timeline.setCurrentTime(startTime);
@@ -759,8 +765,15 @@ function Timeline() {
 	
 	// load the end and start times
 	db.view("textworld/delta_dates", {
+		startkey: [world],
+		endkey: [world, {}],
 		success: function (resp) {
-			var range = resp.rows[0].value;
+			var row = resp.rows[0];
+			if (!row) {
+				// empty world
+				return;
+			}
+			var range = row.value;
 			self.startTime = range.first;
 			self.setEndTime(range.last);
 			slider.update();
@@ -803,12 +816,13 @@ function Timeline() {
 		var prevDeltaDate = self.currentTime;
 		db.view("textworld/delta_dates", {
 			reduce: false,
-			startkey: prevDeltaDate,
+			startkey: [world, prevDeltaDate],
+			endkey: [world, {}],
 			limit: num,
 			include_docs: true,
 			success: function (resp) {
 				resp.rows.forEach(function (row) {
-					var thisDeltaDate = row.key;
+					var thisDeltaDate = row.key[1];
 					deltasIndex[prevDeltaDate] = row.doc;
 					prevDeltaDate = thisDeltaDate;
 				});

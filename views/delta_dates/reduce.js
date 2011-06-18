@@ -11,10 +11,10 @@ function(keys, values, rereduce) {
 	} else {
 		return {
 			first: Math.min.apply(0, keys.map(function (key) {
-				return key[0];
+				return key[0][1];
 			})),
 			last: Math.max.apply(0, keys.map(function (key) {
-				return key[0];
+				return key[0][1];
 			}))
 		};
 	}

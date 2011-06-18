@@ -20,7 +20,7 @@ function(doc) {
 	var xEnd = offsetX + width;
 	for (var y = yStart; y < yEnd; y += boxH) {
 		for (var x = xStart; x < xEnd; x += boxW) {
-			emit([x, y, doc.date], 1);
+			emit([doc.world, x, y, doc.date], null);
 		}
 	}
 }

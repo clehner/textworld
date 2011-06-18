@@ -15,8 +15,11 @@ function (doc, oldDoc, userCtx) {
 	}
 	
 	if (type == "delta") {
+		if (typeof doc.world != "string") {
+			throw {forbidden: "Delta must have a world string."};
+		}
 		if (typeof doc.content != "string") {
-			throw {forbidden: "Delta must have string content."};
+			throw {forbidden: "Delta must have a content string."};
 		}
 		if (typeof doc.x != "number" || typeof doc.y != "number") {
 			throw {forbidden: "Delta must have numberic coordinates."};
