@@ -437,17 +437,29 @@ function Updater(db, since) {
 // loader, which we don't want. So we record the db update_seq first, then
 // listen for changes after all the cells are loaded.
 
-var update_seq;
-db.info({success: function (info) {
-	update_seq = info.update_seq;
-}});
+var dbInfoCbs = [];
+function dbInfo(cb) {
+	if (dbInfo._info) {
+		cb(dbInfo._info);
+	} else {
+		dbInfoCbs.push(cb);
+	}
+}
+db.info({
+	success: function (info) {
+		dbInfo._info = info;
+		dbInfoCbs.forEach(function (cb) { cb(info) });
+	},
+	error: function () {}
+});
 
 cells.onCellsLoaded = function () {
 	delete cells.onCellsLoaded; // one time listener
-	setTimeout(function () {
+	dbInfo(function (info) {
+		var update_seq = info.update_seq;
 		new Updater(db, update_seq).listenForUpdates();
 		listenForDeltas(update_seq);
-	}, 100);
+	});
 };
 
 // editing stuff

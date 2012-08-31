@@ -90,8 +90,6 @@ var Couch = (function() {
       url += "?" + data;
     }
     
-    opt.beforeSend && opt.beforeSend();
-    
     if (opt.username) {
       xhr.open(type, url, opt.async, opt.username, opt.password);
     } else {
@@ -384,6 +382,7 @@ var Couch = (function() {
           }
           // when there is a change, call any listeners, then check for another change
           options.success = function(resp) {
+            if (!resp) return options.error();
             timeout = 100;
             if (active) {
               since = resp.last_seq;
@@ -408,16 +407,24 @@ var Couch = (function() {
               "Error connecting to "+db.uri+"/_changes."
             );
           }
+		  function getSince() {
+            db.info({
+              success: function(info) {
+                since = info.update_seq;
+                getChangesSince();
+              },
+              error: function() {
+                timeout *= 2;
+                setTimeout(getSince, timeout);
+              }
+            });
+          }
           // start the first request
           if (since) {
             getChangesSince();
           } else {
-            db.info({
-              success : function(info) {
-                since = info.update_seq;
-                getChangesSince();
-              }
-            });
+			timeout = 100;
+            getSince();
           }
           return promise;
         },
@@ -487,7 +494,7 @@ var Couch = (function() {
             ajaxOptions
           );
         },
-        saveDoc: function(doc, options, ajaxOptions) {
+        saveDoc: function(doc, options) {
           options = options || {};
           var db = this;
           var beforeSend = fullCommit(options);
@@ -532,8 +539,7 @@ var Couch = (function() {
               }
             }},
             options,
-            "The document could not be saved: ",
-            ajaxOptions
+            "The document could not be saved: "
           );
         },
         bulkSave: function(docs, options) {

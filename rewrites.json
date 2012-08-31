@@ -4,6 +4,10 @@
 		"to" : "../../*"
 	},
 	{
+		"from" : "textworld",
+		"to" : "../../"
+	},
+	{
 		"from": ":world",
 		"to": "index.html"
 	},
